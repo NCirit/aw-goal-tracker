@@ -142,7 +142,7 @@ class CircularProgress(QWidget):
 
         self.refresh_timer = QTimer()
         self.refresh_timer.timeout.connect(self.on_refresh)
-        self.refresh_timer.setInterval(6 * 1000) # 1 minute intervals
+        self.refresh_timer.setInterval(60 * 1000) # 1 minute intervals
         self.refresh_timer.start()
 
         self.setContextMenuPolicy(3)  # Qt.CustomContextMenu
@@ -153,14 +153,12 @@ class CircularProgress(QWidget):
         self.fetch_thread_pool = QThreadPool(self)
 
     def on_refresh(self):
-        self.refresh_timer.stop()
         def fetch_data():
             if self.filterConfig.model.rowCount() < 1:
                 return
             begin_date, end_date = self.goal.get_date_range()
             hours = fetch_hours(self.filterConfig.to_aw_filter(), begin_date, end_date)
             self.on_goal_progress(hours)
-            self.refresh_timer.start()
         self.fetch_thread_pool.start(fetch_data)
 
         
