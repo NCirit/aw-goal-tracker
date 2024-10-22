@@ -5,6 +5,7 @@ import requests
 
 AW_QUERY_URL = "http://localhost:5600/api/0/query/"
 
+
 def fetch_hours(filters : list, begin_date : datetime, end_date : datetime):
     data = {
         "query": [
@@ -44,7 +45,7 @@ def fetch_hours(filters : list, begin_date : datetime, end_date : datetime):
                      continue
                 
                 for cat in res['cat_events']:
-                     if cat['data']['$category'] != "Uncategorized":
+                     if cat['data']['$category'][0] != "Uncategorized":
                           total_secs += cat['duration']
             
     return total_secs / 60 / 60

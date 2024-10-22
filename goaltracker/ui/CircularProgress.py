@@ -47,7 +47,7 @@ class GoalEditor(QWidget):
         self.combo_goal_type.addItem(GoalTypes.MONTHLY)
         self.combo_goal_type.addItem(GoalTypes.YEARLY)
         self.combo_goal_type.addItem(GoalTypes.CUSTOM)
-        self.combo_goal_type.setCurrentIndex(0)
+        self.combo_goal_type.setCurrentIndex(self.combo_goal_type.findText(goal.goal_type))
         self.combo_goal_type.currentIndexChanged.connect(self.goal_type_selected)
         self.combo_goal_type.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
         grid.addWidget(QLabel("Goal type: "), current_row, LABEL_COL)
@@ -55,14 +55,20 @@ class GoalEditor(QWidget):
         current_row += 1
 
         self.dte_begin_date = QDateTimeEdit()
-        self.dte_begin_date.setDateTime(datetime.now())
+        if not self.goal.begin_date is None:
+            self.dte_begin_date.setDateTime(self.goal.begin_date)
+        else:
+            self.dte_begin_date.setDateTime(datetime.now())
         self.dte_begin_date.setDisabled(True)
         grid.addWidget(QLabel("Begin date: "), current_row, LABEL_COL)
         grid.addWidget(self.dte_begin_date, current_row, WIDGET_COL)
         current_row += 1
         
         self.dte_end_date = QDateTimeEdit()
-        self.dte_end_date.setDateTime(datetime.now())
+        if not self.goal.end_date is None:
+            self.dte_end_date.setDateTime(self.goal.end_date)
+        else:
+            self.dte_end_date.setDateTime(datetime.now())
         self.dte_end_date.setDisabled(True)
         grid.addWidget(QLabel("End date: "), current_row, LABEL_COL)
         grid.addWidget(self.dte_end_date, current_row, WIDGET_COL)
@@ -136,7 +142,8 @@ class CircularProgress(QWidget):
 
         self.refresh_timer = QTimer()
         self.refresh_timer.timeout.connect(self.on_refresh)
-        self.refresh_timer.start(60 * 1000) # 1 minute intervals
+        self.refresh_timer.setInterval(6 * 1000) # 1 minute intervals
+        self.refresh_timer.start()
 
         self.setContextMenuPolicy(3)  # Qt.CustomContextMenu
         self.customContextMenuRequested.connect(self.show_context_menu)
@@ -146,15 +153,18 @@ class CircularProgress(QWidget):
         self.fetch_thread_pool = QThreadPool(self)
 
     def on_refresh(self):
+        self.refresh_timer.stop()
         def fetch_data():
+            if self.filterConfig.model.rowCount() < 1:
+                return
             begin_date, end_date = self.goal.get_date_range()
             hours = fetch_hours(self.filterConfig.to_aw_filter(), begin_date, end_date)
             self.on_goal_progress(hours)
+            self.refresh_timer.start()
         self.fetch_thread_pool.start(fetch_data)
-        
 
+        
     def on_filter_window_close(self):
-        self.on_goal_edited()
         self.signal_filter_update.emit(self.goal.goal_id, self.filterConfig)
 
     def from_dict(self, dict_values):
