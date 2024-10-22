@@ -158,7 +158,8 @@ class CircularProgress(QWidget):
                 return
             begin_date, end_date = self.goal.get_date_range()
             hours = fetch_hours(self.filterConfig.to_aw_filter(), begin_date, end_date)
-            self.on_goal_progress(hours)
+            if not hours is None:
+                self.on_goal_progress(hours)
         self.fetch_thread_pool.start(fetch_data)
 
         
