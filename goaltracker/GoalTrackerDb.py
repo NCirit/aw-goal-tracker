@@ -11,7 +11,8 @@ class GoalTrackerDb:
         inserted_goal = cur.execute(
             "INSERT INTO Goal (name, target, last_progress, type, active, begin_date, end_date, creation_date)"
             "VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())",
-            (goal.name, goal.target, goal.current_progress, goal.goal_type, goal.active, goal.begin_date, goal.end_date)
+            (goal.name, goal.target, goal.current_progress, goal.goal_type, goal.active, 
+            Goal.datetime2unixtimestamp(goal.begin_date), Goal.datetime2unixtimestamp(goal.end_date))
         )
         self.con.commit()
 
@@ -68,7 +69,7 @@ class GoalTrackerDb:
                 "SET name = (?), target = (?), last_progress = (?), type = (?), active = (?), begin_date = (?), end_date = (?) "
                 "WHERE id = (?)",
                 (goal.name, goal.target, goal.current_progress, goal.goal_type, goal.active,
-                goal.begin_date, goal.end_date, goal.goal_id)
+                Goal.datetime2unixtimestamp(goal.begin_date), Goal.datetime2unixtimestamp(goal.end_date), goal.goal_id)
             )
             self.con.commit()
         else:

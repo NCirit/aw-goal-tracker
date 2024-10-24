@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone, timedelta
 import calendar
+import time
 
 class GoalTypes:
     CUSTOM = "custom"
@@ -24,6 +25,12 @@ class Goal:
         if not dict_values is None:
             self.from_dict(dict_values)
     
+    @staticmethod
+    def datetime2unixtimestamp(date : datetime):
+        if date is None:
+            return None
+        return time.mktime(date.timetuple())
+        
     def get_date_range(self):
         begin_date, end_date = None, None
         if self.goal_type == GoalTypes.CUSTOM:

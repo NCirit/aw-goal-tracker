@@ -35,20 +35,23 @@ def fetch_hours(filters : list, begin_date : datetime, end_date : datetime):
     data_json = json.dumps(data)
     headers = {'Content-type': 'application/json'}
 
-    response = requests.post(AW_QUERY_URL, data=data_json, headers=headers)
-    total_secs = 0
-    
-    if response.status_code == 200:
+    try:
+        response = requests.post(AW_QUERY_URL, data=data_json, headers=headers)
+        total_secs = 0
+        
+        if response.status_code == 200:
             results = json.loads(response.content)
             for res in results:
                 if "cat_events" not in res.keys():
-                     continue
+                        continue
                 
                 for cat in res['cat_events']:
-                     if cat['data']['$category'][0] != "Uncategorized":
-                          total_secs += cat['duration']
-            
-    return total_secs / 60 / 60
+                        if cat['data']['$category'][0] != "Uncategorized":
+                            total_secs += cat['duration']
+            return total_secs / 60 / 60
+    except:
+        pass
+    return None
 
 def main():
     filter = [[['Work'], {'type': 'regex', 'ignore_case': True, 'regex': 'code'}]]
