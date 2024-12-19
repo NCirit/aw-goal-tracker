@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, QSettings
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, \
     QHBoxLayout
 
@@ -59,6 +59,17 @@ class GoalTrackerMainWindow(QWidget):
         self.is_dragging = False
         self.drag_position = QPoint()
     
+        self.restore_window_geometry()
+    
+    def save_window_geometry(self):
+        settings = QSettings("goaltracker", "goaltracker")
+        settings.setValue("geometry", self.saveGeometry())
+
+    def restore_window_geometry(self):
+        settings = QSettings("goaltracker", "goaltracker")
+        geometry = settings.value("geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
     
     def create_and_register_goal_widget(self, goal : Goal, filter : dict = None):
         goal_widget = CircularProgress(goal=goal, filter = filter)

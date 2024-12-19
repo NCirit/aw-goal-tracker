@@ -8,8 +8,9 @@ def main():
     root_widget = GoalTrackerMainWindow()
     root_widget.show()
 
-    root_widget.resize(300, 300)
+    #root_widget.resize(300, 300)
 
+    app.aboutToQuit.connect(root_widget.save_window_geometry)
     # Update progress value for demonstration
     sys.exit(app.exec_())
 
