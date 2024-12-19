@@ -5,7 +5,14 @@ Goal tracker is a desktop widget that allows you set daily, monthly, or etc. goa
 ## Requirements
 - Python3
 - [Activity Watch](https://activitywatch.net/downloads/) needs to be installed as the app gets the data from it. 
-- Ui is developed with PyQt5 so it needs to be installed. ```pip install PyQt5```
+
+## Installation
+
+```
+pip install git+ssh://github.com/NCirit/aw-goal-tracker.git
+```
+
+
 
 ## Usage:
 

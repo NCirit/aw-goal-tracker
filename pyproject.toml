@@ -1,0 +1,14 @@
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "goaltracker"
+description = "Goal tracker is a desktop widget that depends on Activity Watch and allows you set goals for how you want to spend time on your computer"
+authors = ["Nurullah Cirit <n.cirit.n@gmail.com>"]
+version = "1.0.0"
+
+[tool.poetry.dependencies]
+requests = "*"
+PyQt5 = "*"
