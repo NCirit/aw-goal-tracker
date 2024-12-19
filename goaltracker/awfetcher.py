@@ -6,16 +6,16 @@ import requests
 AW_QUERY_URL = "http://localhost:5600/api/0/query/"
 
 
-def fetch_hours(filters : list, begin_date : datetime, end_date : datetime):
+def fetch_hours(filters : list, begin_date : datetime, end_date : datetime, filter_afk : bool):
     data = {
         "query": [
             "events = flood(query_bucket(find_bucket(\"aw-watcher-window\")));",
-            "not_afk = flood(query_bucket(find_bucket(\"aw-watcher-afk\")));",
-            "not_afk = filter_keyvals(not_afk, \"status\", [\"not-afk\"]);",
             "browser_events = [];",
             "audible_events = filter_keyvals(browser_events, \"audible\", [true]);",
-            "not_afk = period_union(not_afk, audible_events);",
-            "events = filter_period_intersect(events, not_afk);",
+            "not_afk = flood(query_bucket(find_bucket(\"aw-watcher-afk\")));" if filter_afk else "",
+            "not_afk = filter_keyvals(not_afk, \"status\", [\"not-afk\"]);" if filter_afk else "",
+            "not_afk = period_union(not_afk, audible_events);" if filter_afk else "",
+            "events = filter_period_intersect(events, not_afk);" if filter_afk else "",
             "events = categorize(events, {});".format(json.dumps(filters)),
             "cat_events   = sort_by_duration(merge_events_by_keys(events, [\"$category\"]));",
             "duration = sum_durations(events);",
@@ -61,7 +61,7 @@ def main():
 
     end_date = datetime.now(timezone(timedelta(hours=3)))
     end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=0)
-    print(fetch_hours(filter, begin_date=begin_date, end_date=end_date))
+    print(fetch_hours(filter, begin_date=begin_date, end_date=end_date, filter_afk=True))
 
     pass
 

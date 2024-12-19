@@ -33,7 +33,7 @@ class GoalTrackerMainWindow(QWidget):
                 goal_id, goal_name, goal_target,\
                 goal_current_progress, goal_type, \
                 goal_active, begin_date,\
-                end_date, creation_date = agoal
+                end_date, filter_afk, creation_date = agoal
                 
                 # Convert unix timestamp to python datetime
                 if begin_date:
@@ -43,7 +43,7 @@ class GoalTrackerMainWindow(QWidget):
                     end_date = datetime.fromtimestamp(end_date)
 
                 goal = Goal(goal_id=goal_id, current_progress=goal_current_progress, name = goal_name, target = goal_target,
-                    goal_type=goal_type, begin_date=begin_date, end_date=end_date)
+                    goal_type=goal_type, begin_date=begin_date, end_date=end_date, filter_afk = filter_afk)
                 
                 goal_filter = self.goal_tracker_db.get_goal_filter(goal_id)
                 filter = None
@@ -76,6 +76,7 @@ class GoalTrackerMainWindow(QWidget):
         self.goal_tracker_db.update_goal_progress(goal.goal_id, goal.current_progress)
 
     def on_filter_update(self, goal_id : int, filterConfig : FilterConfiguration):
+        self.goal_tracker_db.update_goal_filter_afk(goal_id, filterConfig.filter_afk)
         self.goal_tracker_db.update_goal_filter(goal_id, filterConfig.to_dict())
 
     def on_progress_delete(self, widget : CircularProgress):

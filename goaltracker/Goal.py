@@ -11,7 +11,7 @@ class GoalTypes:
 
 class Goal:
     def __init__(self, goal_id = None, name = "", target = 1, current_progress = 0, 
-            goal_type = GoalTypes.DAILY, active = True, begin_date : datetime = None, end_date : datetime = None, dict_values : dict = None):
+            goal_type = GoalTypes.DAILY, active = True, begin_date : datetime = None, end_date : datetime = None, filter_afk=False, dict_values : dict = None):
         self.name = name
         self.target = target
         self.current_progress = current_progress
@@ -21,6 +21,7 @@ class Goal:
         self.begin_date = begin_date
         self.end_date = end_date
         self.active = active
+        self.filter_afk = filter_afk
 
         if not dict_values is None:
             self.from_dict(dict_values)
@@ -67,6 +68,7 @@ class Goal:
         self.begin_date = dict_values["begin_date"]
         self.end_date = dict_values["end_date"]
         self.active = dict_values["active"]
+        self.filter_afk = dict_values["filter_afk"]
 
     def to_dict(self):
         return {
@@ -77,5 +79,6 @@ class Goal:
             "goal_type" : self.goal_type,
             "begin_date" : self.begin_date,
             "end_date" : self.end_date,
-            "active": self.active
+            "active": self.active,
+            "filter_afk": self.filter_afk
         }

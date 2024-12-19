@@ -1,6 +1,6 @@
 import sys, json
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeView, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeView, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QCheckBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 class AwFilterTreeView(QTreeView):
@@ -21,7 +21,7 @@ class AwFilterTreeView(QTreeView):
 class FilterConfiguration(QWidget):
     signal_close_window = pyqtSignal()
 
-    def __init__(self, parent : QWidget = None, data : dict = None):
+    def __init__(self, parent : QWidget = None, data : dict = None, filter_afk: bool = False):
         super().__init__(parent)
         self.setWindowTitle("Goal aw filter configuration")
         self.setGeometry(200, 100, 600, 400)
@@ -33,6 +33,8 @@ class FilterConfiguration(QWidget):
         self.tree_view = AwFilterTreeView(self)
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels(["Category", "Ignore Case", "Regex Filter"])
+
+        self.filter_afk = filter_afk
 
         # Populate the tree with data
         if not data is None:
@@ -48,11 +50,20 @@ class FilterConfiguration(QWidget):
         
         btnAdd = QPushButton("Add")
         btnDelete = QPushButton("Delete")
-        
+
         btnAdd.setMinimumSize(50, 30)
         btnAdd.setMaximumSize(100, 50)
         btnDelete.setMinimumSize(50, 30)
         btnDelete.setMaximumSize(100, 50)
+
+        self.chkBoxFilterAfk = QCheckBox("Filter Afk")
+
+        if self.filter_afk:
+            self.chkBoxFilterAfk.setCheckState(Qt.Checked)
+
+        self.chkBoxFilterAfk.stateChanged.connect(self.on_filter_afk_checkbox_change)
+
+        hbox.addWidget(self.chkBoxFilterAfk)
         hbox.addWidget(QLabel())
         hbox.addWidget(btnAdd)
         hbox.addWidget(btnDelete)
@@ -62,7 +73,6 @@ class FilterConfiguration(QWidget):
 
         self.model.dataChanged.connect(self.on_data_changed)
 
-    
     def closeEvent(self, event):
         self.signal_close_window.emit()
         super().closeEvent(event)
@@ -92,6 +102,9 @@ class FilterConfiguration(QWidget):
         # Add the new row as a child of the double-clicked item
         item.appendRow([new_child, new_child_checkbox, new_child_desc])
         self.save_settings()
+
+    def on_filter_afk_checkbox_change(self, state):
+        self.filter_afk = state == Qt.Checked
 
     def save_settings(self):
         with open("temp.txt", "w")  as fl:

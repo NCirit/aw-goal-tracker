@@ -9,10 +9,10 @@ class GoalTrackerDb:
     def add_goal(self, goal : Goal):
         cur = self.con.cursor()
         inserted_goal = cur.execute(
-            "INSERT INTO Goal (name, target, last_progress, type, active, begin_date, end_date, creation_date)"
-            "VALUES (?, ?, ?, ?, ?, ?, ?, unixepoch())",
+            "INSERT INTO Goal (name, target, last_progress, type, active, begin_date, end_date, filter_afk, creation_date)"
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch())",
             (goal.name, goal.target, goal.current_progress, goal.goal_type, goal.active, 
-            Goal.datetime2unixtimestamp(goal.begin_date), Goal.datetime2unixtimestamp(goal.end_date))
+            Goal.datetime2unixtimestamp(goal.begin_date), Goal.datetime2unixtimestamp(goal.end_date), goal.filter_afk)
         )
         self.con.commit()
 
@@ -59,6 +59,16 @@ class GoalTrackerDb:
             )
         self.con.commit()
 
+    def update_goal_filter_afk(self, goal_id : int, filter_afk: bool):
+        cur = self.con.cursor()
+        cur.execute(
+                "UPDATE Goal "
+                "SET filter_afk = (?) "
+                "WHERE id = (?)",
+                (filter_afk, goal_id)
+            )
+        self.con.commit()
+
     def update_goal(self, goal : Goal):
         registered_goal = self.get_goal(goal.goal_id)
 
@@ -66,10 +76,10 @@ class GoalTrackerDb:
         if len(registered_goal) > 0:
             cur.execute(
                 "UPDATE Goal "
-                "SET name = (?), target = (?), last_progress = (?), type = (?), active = (?), begin_date = (?), end_date = (?) "
+                "SET name = (?), target = (?), last_progress = (?), type = (?), active = (?), begin_date = (?), end_date = (?), filter_afk = (?) "
                 "WHERE id = (?)",
                 (goal.name, goal.target, goal.current_progress, goal.goal_type, goal.active,
-                Goal.datetime2unixtimestamp(goal.begin_date), Goal.datetime2unixtimestamp(goal.end_date), goal.goal_id)
+                Goal.datetime2unixtimestamp(goal.begin_date), Goal.datetime2unixtimestamp(goal.end_date), goal.filter_afk, goal.goal_id)
             )
             self.con.commit()
         else:
@@ -155,6 +165,7 @@ class GoalTrackerDb:
                 "active INTEGER NOT NULL DEFAULT (1),"
                 "begin_date INTEGER,"
                 "end_date INTEGER,"
+                "filter_afk INTEGER NOT NULL DEFAULT (0),"
                 "creation_date INTEGER NOT NULL DEFAULT (unixepoch())"
             ")"
         )

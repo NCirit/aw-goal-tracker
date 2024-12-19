@@ -107,12 +107,13 @@ class CircularProgress(QWidget):
         super().__init__(parent)
         self.goal = goal
 
-        self.filterConfig = FilterConfiguration(data=filter, parent=self)
 
         # If a dict is given try loading goal and filter from it
         if not dict_values is None:
             self.from_dict(dict_values)
-    
+        
+        self.filterConfig = FilterConfiguration(data=filter, parent=self, filter_afk=self.goal.filter_afk)
+
         self.goal_editor = GoalEditor(self.goal)
 
         vbox = QVBoxLayout(self)
@@ -157,13 +158,14 @@ class CircularProgress(QWidget):
             if self.filterConfig.model.rowCount() < 1:
                 return
             begin_date, end_date = self.goal.get_date_range()
-            hours = fetch_hours(self.filterConfig.to_aw_filter(), begin_date, end_date)
+            hours = fetch_hours(self.filterConfig.to_aw_filter(), begin_date, end_date, self.goal.filter_afk)
             if not hours is None:
                 self.on_goal_progress(hours)
         self.fetch_thread_pool.start(fetch_data)
 
         
     def on_filter_window_close(self):
+        self.goal.filter_afk = self.filterConfig.filter_afk
         self.signal_filter_update.emit(self.goal.goal_id, self.filterConfig)
 
     def from_dict(self, dict_values):
@@ -193,16 +195,19 @@ class CircularProgress(QWidget):
         action2 = QAction("Configure aw filters", self)
         action3 = QAction("Delete", self)
         action4 = QAction("Quit", self)
+        actionRefresh = QAction("Refresh", self)
 
         # Connect actions to methods
         action1.triggered.connect(self.edit_goal_action)
         action2.triggered.connect(self.configure_aw_filter_action)
         action3.triggered.connect(self.delete_action)
         action4.triggered.connect(QApplication.instance().quit)
+        actionRefresh.triggered.connect(self.on_refresh)
 
         # Add the actions to the menu
         menu.addAction(action1)
         menu.addAction(action2)
+        menu.addAction(actionRefresh)
         menu.addAction(action3)
         menu.addAction(action4)
 
